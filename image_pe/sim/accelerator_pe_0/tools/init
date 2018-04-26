@@ -1,0 +1,10 @@
+#!/bin/sh
+
+g++ -o tools/ppm2mem tools/ppm2mem.cpp
+#./tools/ppm2mem 10 10 tools/cross.ppm tools/mem_init.mem
+#./tools/ppm2mem 10 10 tools/test.ppm tools/mem_init.mem
+#./tools/ppm2mem 20 20 tools/border_test.ppm tools/mem_init.mem
+./tools/ppm2mem 128 128 tools/lena.ppm tools/mem_init.mem
+#./ppm2mem 512 512 lenabigb.ppm mem_init.mem
+#./ppm2mem 1920 1080 circles.ppm circles.mem
+#./ppm2mem 640 480 redsquare.ppm redsquare.mem

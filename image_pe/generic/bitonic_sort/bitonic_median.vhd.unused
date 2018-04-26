@@ -1,0 +1,58 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use IEEE.math_real.all;
+ 
+entity bitonic_median is
+    Generic ( ELEMENT_SIZE : Integer := 8;
+              ARRAY_SIZE : Integer := 25 );
+    Port ( data_in : in std_logic_vector(ARRAY_SIZE*ELEMENT_SIZE-1 downto 0);
+           median_out : out std_logic_vector(ELEMENT_SIZE-1 downto 0);
+           clk : in STD_LOGIC;
+           en : in STD_LOGIC;
+           nd : in STD_LOGIC;
+           valid : out STD_LOGIC;
+           rst : in STD_LOGIC);
+end bitonic_median;
+
+architecture Behavioral of bitonic_median is
+
+signal internal_data_out : std_logic_vector(ARRAY_SIZE*ELEMENT_SIZE-1 downto 0); 
+
+signal median_out_internal : std_logic_vector(ELEMENT_SIZE downto 0);
+signal median_out_internal1 : std_logic_vector(ELEMENT_SIZE downto 0);
+signal median_out_internal2 : std_logic_vector(ELEMENT_SIZE downto 0);
+
+begin
+
+    m: entity work.bitonic_sort
+        generic map(
+            ELEMENT_SIZE => ELEMENT_SIZE,
+            ARRAY_SIZE => ARRAY_SIZE
+        )
+        port map(
+            data_in => data_in,
+            data_out => internal_data_out,
+            clk => clk,
+            en => en,
+            nd => nd,
+            valid => valid,
+            rst => rst
+        );
+
+    median_calculation_even: if (ARRAY_SIZE mod 2) = 0 generate
+        median_out_internal1(ELEMENT_SIZE) <= '0';
+        median_out_internal2(ELEMENT_SIZE) <= '0';
+        median_out_internal1(ELEMENT_SIZE - 1 downto 0) <= internal_data_out(((ARRAY_SIZE) / 2 + 1) * ELEMENT_SIZE - 1 downto ((ARRAY_SIZE) / 2) * ELEMENT_SIZE);
+        median_out_internal2(ELEMENT_SIZE - 1 downto 0) <= internal_data_out(((ARRAY_SIZE) / 2) * ELEMENT_SIZE - 1 downto ((ARRAY_SIZE) / 2 - 1) * ELEMENT_SIZE);
+        median_out_internal <= std_logic_vector(unsigned(median_out_internal1) + unsigned(median_out_internal2));
+        median_out <= median_out_internal(ELEMENT_SIZE downto 1);
+    end generate;
+    median_calculation_odd: if (ARRAY_SIZE mod 2) = 1 generate
+        median_out_internal1 <= (others => '0');
+        median_out_internal2 <= (others => '0');
+        median_out_internal <= (others => '0');
+        median_out <= internal_data_out(((ARRAY_SIZE - 1) / 2 + 1) * ELEMENT_SIZE - 1 downto ((ARRAY_SIZE - 1) / 2) * ELEMENT_SIZE);
+    end generate;
+
+end Behavioral;

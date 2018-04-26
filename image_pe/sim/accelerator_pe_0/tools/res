@@ -1,0 +1,4 @@
+#!/bin/sh
+g++ -o tools/mem2ppm tools/mem2ppm.cpp
+#./mem2ppm 512 512 mem_init.mem output.ppm
+tools/mem2ppm 128 128 tools/mem_res.mem tools/output.ppm

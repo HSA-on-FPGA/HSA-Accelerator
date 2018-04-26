@@ -1,0 +1,10 @@
+/xilinx_libs
+/*/modelsim.ini
+/*/transcript
+/*/vsim.wlf
+/*/work/
+/*/tools/ppm2mem
+/*/tools/mem2ppm
+/*/tools/output.ppm
+/*/tools/output.ppm
+/*/tools/*.mem
