@@ -29,8 +29,8 @@ port(
   clk   : in  std_logic;
   rst_n : in  std_logic;
   en    : in  std_logic; -- Global enable signal
-  -- Control Line Infertace
-  nd    : in  std_logic; -- New Data for valid input pixel
+  -- Control line infertace
+  nd    : in  std_logic; -- New data for valid input pixel
   valid : out std_logic;  -- Output has valid information
   -- Config interface, must be constant, should only be changed, if not in processing mode 
   ww      : in std_logic_vector(c_ww_addr_0-1 downto 0);
@@ -97,9 +97,6 @@ signal s_rank_out  : VEC_KEROUT;
 signal s_tresh_out : VEC_KEROUT;
 signal s_norm_out : VEC_KEROUT;
 
--- Specific Kernel enable signals for Sort Kernel
--- signal s_enmed, s_enero, s_endil : std_logic;
-
 
 begin
 
@@ -112,9 +109,8 @@ con_coeff: for i in  0 to c_vecsize-1  generate
   s_coeff_one((i+1)*c_convw-1 downto i*c_convw) <= std_logic_vector(resize(signed(coeff_one(i)),c_convw));
   s_coeff_two((i+1)*c_convw-1 downto i*c_convw) <= std_logic_vector(resize(signed(coeff_two(i)),c_convw));
 end generate;
+
 -- enables correct kernel
-
-
 
 en_kernel: process(s_kmode)
   variable v_kmode: integer;
@@ -152,7 +148,6 @@ generic map(
 port map(
   clk   => clk,
   rst_n => rst_n,
-  --en    => s_envec(0),
   en    => nd,
   nd    => nd,
   valid => s_validvec(i)(0),
@@ -176,21 +171,6 @@ port map(
   di_b    => s_coeff_two, 
   do    => s_conv_two_out(i)
 );
-
---sort: entity work.sort
---generic map(
---  g_valuewidth => c_dw,
---  g_vectorsize => c_vecsize
---)
---port map(
---  clk   => clk,
---  rst_n => rst_n,
---  en    => s_envec(2),
---  nd    => nd,
---  valid => s_validvec(i)(2),
---  di    => s_sortlin(i),
---  do    => s_sortlin_out(i)
---);
 
 sort: entity work.bitonic_sort
 generic map(
@@ -280,38 +260,6 @@ else
 end if;
 end process;
 
--- passing out correct signal to do port
-
---wb_proc: process(clk)
---  variable v_kmode: integer;
---begin
-
---if(clk'event and clk='1') then
---  if(rst_n='0') then
---    do((i+1)*c_dw-1 downto i*c_dw) <= (others=>'0');
---    s_valid(i) <= '0';
---  elsif(en='1') then
---    v_kmode := to_integer(unsigned(s_kmode));
---    if(v_kmode = 0) then
---			if(nd='1') then
---        do((i+1)*c_dw-1 downto i*c_dw) <= s_norm_out(i);
---      end if;
---      s_valid(i) <= s_validvec(i)(0);
---    elsif(v_kmode = 1) then
---			if(nd='1') then
---        do((i+1)*c_dw-1 downto i*c_dw) <= s_tresh_out(i);
---      end if;
---      s_valid(i) <= s_validvec(i)(1);
---   elsif(v_kmode >= 2) then
---			if(nd='1') then
---        do((i+1)*c_dw-1 downto i*c_dw) <= s_rank_out(i);
---      end if;
---      s_valid(i) <= s_validvec(i)(2);
---    end if;
---  end if;
---end if;
---end process;
-
 wb_proc: process(s_kmode,s_tresh_out,s_rank_out, s_norm_out)
   variable v_kmode: integer;
 begin
@@ -337,13 +285,5 @@ end process;
 end generate;
 
 valid <=s_valid(0);
---valid_proc:process(s_valid_comp,s_valid)
---begin
---  if (s_valid=s_valid_comp) then
---    valid <='1';
---  else
---    valid <='0';
---  end if;
---end process;
 
 end behavior;

@@ -17,39 +17,9 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 --
 
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 05/11/2016 07:14:07 PM
--- Design Name: 
--- Module Name: fifo_to_axi_stream - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
-
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
-library ieee;
 use ieee.math_real.all;
 
 entity fifo_to_axi_stream is
@@ -104,7 +74,7 @@ begin
         if reset='0' then
             data_word_ready <= '0';
         else
-            data_word_ready <= data_word_ready; -- required?
+            data_word_ready <= data_word_ready; 
         
             if data_word_needs_new_data = '1' then
                 if fifo_empty = '0' then
@@ -112,27 +82,11 @@ begin
                 else
                     data_word_ready <= '0';
                 end if;
---            data_buffer <= fifo_data_out;
             end if;
         end if;    
       end if;    
     end process;
 
---    use_buffer <= not axi_tready;
-
-
---    buffer_switch: process(use_buffer, fifo_data_out, data_buffer)
---    begin
---              if use_buffer= '1' then
---                data_word <= data_buffer;
---              else
---                data_word <= fifo_data_out;
---              end if; 
---    end process;
-
-    
-    -- process is responsible for packaging data (= sending tlast)
-    --tlast_sig <= '1' when to_integer(tlast_counter) = AXI_PACKAGE_SIZE - 1 or fifo_is_last = '1' else '0';
     tlast_sig <= fifo_is_last;
     
     compute_tlast : process(clk)
@@ -147,7 +101,7 @@ begin
                     tlast_counter <= (others => '0');
                 end if;
           else
-              tlast_counter <= tlast_counter; -- required?
+              tlast_counter <= tlast_counter; 
           end if;
         end if;
     end process;

@@ -41,7 +41,6 @@ end conv;
 architecture behavior of conv is
 
 type VEC_DI is array (0 to g_vectorsize-1) of std_logic_vector(g_valuewidth-1 downto 0);
---type VEC_CONV is array (0 to g_vectorsize-1) of std_logic_vector(2*g_valuewidth-1 downto 0);
 
 signal s_nd_d1, s_nd_d2		: std_logic;
 signal s_di_a, s_di_b : VEC_DI;
@@ -67,37 +66,20 @@ end component;
 
 begin
 
---readin: for i in 0 to g_vectorsize-1 generate
---  s_di_a(i) <= di_a((i+1)*g_valuewidth-1 downto i*g_valuewidth);
---  s_di_b(i) <= di_b((i+1)*g_valuewidth-1 downto i*g_valuewidth);
---end generate;
-
 mulreg: process(clk)
 begin
 	if(clk'event and clk='1') then
 	  if (rst_n = '0') then
---		  s_mulres <= (others=>'0');
 			s_nd_d1 <= '0';
 			s_nd_d2 <= '0';
---      s_di_a <= (others=>(others=>'0'));
---      s_di_b <= (others=>(others=>'0'));
     else
 		  s_nd_d1 <= nd; --  one cycle latency for valid bit
---		  s_nd_d2 <= s_nd_d1; --  second cycle latency for valid bit
---		  if (en = '1') then
 			  if(nd='1') then
 			    for i in 0 to g_vectorsize-1 loop
             s_di_a(i) <= di_a((i+1)*g_valuewidth-1 downto i*g_valuewidth);
             s_di_b(i) <= di_b((i+1)*g_valuewidth-1 downto i*g_valuewidth);
-	--			    s_mulres(2*(i+1)*g_valuewidth-1 downto i*2*g_valuewidth) <= std_logic_vector(signed(s_di_a(i)) * signed(s_di_b(i)));
 			    end loop;
         end if;
---			  if(s_nd_d1='1') then
---			    for i in 0 to g_vectorsize-1 loop
---				    s_mulres(2*(i+1)*g_valuewidth-1 downto i*2*g_valuewidth) <= std_logic_vector(signed(s_di_a(i)) * signed(s_di_b(i)));
---			    end loop;
---        end if;
---		  end if;
 		end if;
 	end if;
 end process;

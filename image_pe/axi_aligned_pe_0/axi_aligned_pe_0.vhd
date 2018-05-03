@@ -245,10 +245,7 @@ begin
 end process;
 
 
--- Alignment of gray and colored pixel
 
---s_accel_di_gray <= S_AXIS_TDATA(c_par*c_grayw-1 downto 0);
---s_accel_di_color <= S_AXIS_TDATA(c_par*c_numcol*c_colw-1 downto 0);
 
 axi_to_pixel: entity work.axi_to_pixel
 generic map(
@@ -382,17 +379,6 @@ port map (
   axi_tlast => M_AXIS_TLAST,
   axi_tready => M_AXIS_TREADY
 );
-
-
-
---process(s_accel_do_color,s_accel_do_gray,a_color_mode)
---begin
---  if a_color_mode='1' then
---    M_AXIS_TDATA <= std_logic_vector(resize(unsigned(s_accel_do_gray),M_AXIS_TDATA'length));
---  else
---    M_AXIS_TDATA <= std_logic_vector(resize(unsigned(s_accel_do_color),M_AXIS_TDATA'length));
---  end if;
---end process; 
 
 
 M_AXIS_TKEEP <= (others => '1');

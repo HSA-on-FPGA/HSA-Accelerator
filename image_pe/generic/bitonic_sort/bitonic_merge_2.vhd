@@ -46,7 +46,6 @@ begin
     begin
         if rising_edge(clk) then
             if rst = '0' then
- --               data_sig_in <= (others => (others => '0'));
                 do <= '0';
             elsif en = '1' then
                 do <= di;

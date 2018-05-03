@@ -69,20 +69,10 @@ signal s_color_in, s_color_out: VEC_COLOR;
 --                                    0,1,2,1,0,
 --                                    0,0,0,0,0);
 signal s_coeffint_one: VEC_KERINT:=(0,0,0,0,0,
-                                    0,0,0,0,0, -- uncomment for gauss
+                                    0,0,0,0,0, -- uncomment for no filter
                                     0,0,1,0,0,
                                     0,0,0,0,0,
                                     0,0,0,0,0);
---signal s_coeffint_one: VEC_KERINT:=(0, 1,0,0,0, -- uncomment for laplace
---                                    1,-4,1,0,0,
---                                    0, 1,0,0,0,
---                                    0, 0,0,0,0,
---                                    0, 0,0,0,0);
---signal s_coeffint_one: VEC_KERINT:=(1, 0,-1,0,0, -- uncomment for sobel in x direction
---                                    2, 0,-2,0,0,
---                                    1, 0,-1,0,0,
---                                    0, 0,0,0,0,
---                                    0, 0,0,0,0);
 
 signal s_coeffint_two: VEC_KERINT:=(0,0,0,0,0,
                                     0,1,2,1,0, -- uncomment for sobel in y direction
@@ -102,7 +92,7 @@ begin
 
 a_reserved <=(others=>'0');
 a_color <= '0';
-a_boarder <= "01";
+a_boarder <= "01"; -- only zero pad, other options are not supported for now!!
 a_kernelop <= "000";
 a_norm_tresh <= '0';
 
@@ -149,8 +139,6 @@ port map (
   rout=> s_color_out(0),
   gout=> s_color_out(1),
   bout=> s_color_out(2)
- -- gout=> s_color_out(0),
---  bout=> s_color_out(0)
 );
 
 
@@ -164,7 +152,6 @@ begin
   wait for clk_period/2;
 end process;
 
--- TODO set correct coeffs
 
 en_proc: process
 begin
@@ -196,13 +183,10 @@ wait for clk_period;
 s_dreg <= std_logic_vector(to_unsigned(3,s_dreg'length)); -- set window hight
 s_reg_addr <= std_logic_vector(to_unsigned(4,s_reg_addr'length)); -- set address
 wait for clk_period;
--- set single convolution with norm on (GAUSS, laplace)
---s_dreg <= std_logic_vector(to_unsigned(1,s_dreg'length)); -- set operation
 s_dreg <= s_operation;
 s_reg_addr <= std_logic_vector(to_unsigned(5,s_reg_addr'length)); -- set address
 wait for clk_period;
 s_dreg <= std_logic_vector(to_unsigned(4,s_dreg'length)); -- set norm for gauss
---s_dreg <= std_logic_vector(to_unsigned(0,s_dreg'length)); -- set norm for laplace
 s_reg_addr <= std_logic_vector(to_unsigned(6,s_reg_addr'length)); -- set address
 wait for clk_period;
 s_dreg <= std_logic_vector(to_unsigned(350,s_dreg'length)); -- set tresh
@@ -235,11 +219,6 @@ wait for clk_period;
 start <='0';
 wait for 100*clk_period;
 ready_out <='1';
---nd <='1';
---wait for 100*clk_period;
---nd <='0';
---wait for clk_period;
---nd <='1';
 
 --wait for 1*clk_period;
 for i in 0 to 20 loop
@@ -250,7 +229,7 @@ for i in 0 to 20 loop
   end if;
   wait for 1*clk_period;
 end loop;
-    nd <='1';
+nd <='1';
 
 wait for 100*clk_period;
 
@@ -262,27 +241,14 @@ for i in 0 to 40 loop
   end if;
   wait for 1*clk_period;
 end loop;
-    ready_out <='1';
---nd <='1';
+ready_out <='1';
+nd <='1';
 
 
 
 wait;
 end process;
 --- End of data init and Processing
-
---new_data_sig_gen:process
---begin
---  wait until clk'event and clk='1' and en_nd='1';
---    nd
---	  if(s_nd_cnt > to_unsigned(c_nd_tresh,8)) then
---			nd <= '1';
---			s_nd_cnt <= (others=>'0');
---		else
---	    s_nd_cnt <= s_nd_cnt+1;
---			nd <= '0';
---		end if;
---end process;
 
 -- Mapping color signals to input
 par_gen: for i in 0 to c_par-1 generate

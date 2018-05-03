@@ -51,8 +51,6 @@ signal s_accel_state: t_accel_state;
 
 signal s_read_enable, s_read_last, s_stream_out_enable, s_write_out_first,s_write_out_stream,s_stream_out_last,
 s_pipe_nd, s_pipe_fill, s_pipe_empty,s_pipe_fill_last, s_pipe_empty_last : std_logic;
--- Only for debug
---signal di_g, do_g : std_logic_vector(7 downto 0);
 
 begin
 
@@ -72,9 +70,6 @@ s_write_out_first <= '1' when s_accel_state=FILL and pipe_filled='1' and s_pipe_
 s_stream_out_enable <= s_write_out_first or s_write_out_stream;
 
 
---s_read_enable <= valid_in and s_read_in_possible;
-
---s_pipe_we <= s_read_enable  or s_empty_pipe_enable; 
 
 
 read_in_counter:process(clk)
@@ -193,9 +188,5 @@ begin
   end if;
 end process;
 
---di_g <= di(0)(23 downto 16);
---do_g <= do(15 downto 8);
-  
-   --     do <= di; --TODO fix this
 
 end behavior;

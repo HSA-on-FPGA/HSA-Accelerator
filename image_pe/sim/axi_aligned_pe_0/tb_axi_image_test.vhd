@@ -70,13 +70,11 @@ signal s_axi_rdata : std_logic_vector(c_dw-1 downto 0);
 signal s_axi_rresp : std_logic_vector(1 downto 0);
 
 ------ axis slave  -------
---signal s_axis_aclk, s_axis_aresetn : std_logic;
 signal s_axis_tvalid, s_axis_tready, s_axis_tlast : std_logic;
 signal s_axis_tdata : std_logic_vector(c_dw_data-1 downto 0);
 signal s_axis_tkeep : std_logic_vector(c_dw_data/8-1 downto 0);
 
 ------ axis master  -------
---signal m_axis_aclk, m_axis_aresetn : std_logic;
 signal m_axis_tvalid, m_axis_tready, m_axis_tlast : std_logic;
 signal m_axis_tdata : std_logic_vector(c_dw_data-1 downto 0);
 signal m_axis_tkeep : std_logic_vector(c_dw_data/8-1 downto 0);
@@ -123,6 +121,7 @@ constant c_normval: integer:= 4;
 
 signal s_coeff_one: VEC_COEFF;
 signal s_coeff_two: VEC_COEFF;
+
 -- uncomment for gauss 5x5
 --signal s_coeffint_one: VEC_KERINT:=(1,4,6,4,1,
 --                                    4,16,24,16,4,
@@ -136,11 +135,13 @@ signal s_coeffint_one: VEC_KERINT:=(0,0,0,0,0,
                                     0,2,4,2,0,
                                     0,1,2,1,0,
                                     0,0,0,0,0);
+
 --signal s_coeffint_one: VEC_KERINT:=(0,0,0,0,0,
 --                                    0,0,0,0,0,
 --                                    0,0,1,0,0,
 --                                    0,0,0,0,0,
 --                                    0,0,0,0,0);
+
 --signal s_coeffint_one: VEC_KERINT:=(0,0,0,0,0,
 --                                    0,1,0,-1,0,
 --                                    0,2,0,-2,0,
@@ -170,13 +171,9 @@ begin
 
 a_reserved <=(others=>'0');
 a_color <= '0';
-a_boarder <= "01";
+a_boarder <= "01"; -- only zero padding, other options are not supported for now
 a_kernelop <= "000";
 a_norm_tresh <= '1';
-
---s_red <= std_logic_vector(to_unsigned(1,c_pixw));
---s_green <= std_logic_vector(to_unsigned(2,c_pixw));
---s_blue <= std_logic_vector(to_unsigned(3,c_pixw));
 
 -- correct coeeff mapping
 
@@ -203,7 +200,6 @@ port map (
 
   -- Slave Interface Write Address Ports
   S_AXI_AWADDR   => s_axi_awaddr, -- in regw
-  --    S_AXI_AWPROT   : in  std_logic_vector(3-1 downto 0); -- required??
   S_AXI_AWVALID  => s_axi_awvalid, -- in
   S_AXI_AWREADY  => s_axi_awready, -- out
 
@@ -220,7 +216,6 @@ port map (
 
   -- Slave Interface Read Address Ports
   S_AXI_ARADDR  => s_axi_araddr, -- in regw
-  --    S_AXI_ARPROT   : in  std_logic_vector(3-1 downto 0); -- required???
   S_AXI_ARVALID => s_axi_arvalid, -- in 
   S_AXI_ARREADY => s_axi_arready, -- out
 
@@ -232,8 +227,6 @@ port map (
   ---------------------------------
   ----- Slave AXI Stream Ports-----
   ---------------------------------
---  S_AXIS_ACLK => s_axis_aclk, --in
---  S_AXIS_ARESETN => s_axis_aresetn, --in
   S_AXIS_TVALID => s_axis_tvalid, -- in
   S_AXIS_TDATA  => s_axis_tdata, -- in dw
   S_AXIS_TKEEP  => s_axis_tkeep, -- in dw/8
@@ -243,8 +236,6 @@ port map (
   ---------------------------------
   ----- Master AXI Stream Ports----
   ---------------------------------
---  M_AXIS_ACLK => m_axis_aclk, --in
---  M_AXIS_ARESETN => m_axis_aresetn, -- in
   M_AXIS_TVALID => m_axis_tvalid, -- out
   M_AXIS_TDATA  => m_axis_tdata,  -- out dw
   M_AXIS_TKEEP  => m_axis_tkeep, -- out dw/8
@@ -253,24 +244,13 @@ port map (
   ---------------------------------
   ------------PE Ports ------------
   ---------------------------------
---  pe_clk => pe_clk, --in
   en  => en, --in
---  rst_n => rst_n, --in
   start_read => start_read --in
 );
 
 
 pixel_read <= pixel_valid and s_axis_tready;
 
-
---color_in_mux: process(a_color,s_red, s_blue, s_green, s_gray)
---begin
---  if a_color='0' then
---    s_axis_tdata <= std_logic_vector(resize(unsigned(s_color),s_axis_tdata'length));
---  else
---    s_axis_tdata <= std_logic_vector(resize(unsigned(s_gray),s_axis_tdata'length));
---  end if;
---end process;
 
 pix_gen: entity work.pixel_gen
 generic map(
@@ -294,10 +274,9 @@ port map(
 );
 
 
---s_axis_tvalid <= pixel_read;
 
 
-s_color <= s_blue & s_green & s_red; -- TODO see if order correct
+s_color <= s_blue & s_green & s_red; 
 s_gray <= std_logic_vector(resize(unsigned(s_red),c_par*c_pixw_gray));
 
 pixel_to_axi: entity work.pixel_to_axi
@@ -305,7 +284,7 @@ generic map(
   DATA_WIDTH => c_dw_data,
   GRAY_WIDTH => c_pixw_gray,
   COLOR_WIDTH => c_pixw,
-  NUM_COL => 3, --fixme
+  NUM_COL => 3, 
   PAR => c_par
 )
 port map(
@@ -326,7 +305,7 @@ generic map(
   DATA_WIDTH => c_dw_data,
   GRAY_WIDTH => c_pixw_gray,
   COLOR_WIDTH => c_pixw,
-  NUM_COL => 3, --fixme
+  NUM_COL => 3, 
   PAR => c_par
 )
 port map(
@@ -342,8 +321,6 @@ port map(
   out_ready=> '1'
 );
 
---s_gray_out <= m_axis_tdata(c_par*c_pixw_gray-1 downto 0);
---m_axis_tready <= '1';
 
 color_mux: process(a_color,s_color_out, s_gray_out)
 begin
@@ -352,7 +329,7 @@ begin
 		s_red_out <= s_color_out(c_par*c_pixw-1 downto 0);
 		s_green_out <= s_color_out(2*c_par*c_pixw-1 downto c_par*c_pixw);
 		s_blue_out <= s_color_out(3*c_par*c_pixw-1 downto 2*c_par*c_pixw);
-  else -- TODO change later to 16 bit output
+  else 
     s_red_out <= std_logic_vector(resize(unsigned(s_gray_out),s_red_out'length));
     s_green_out <= std_logic_vector(resize(unsigned(s_gray_out),s_green_out'length));
     s_blue_out <= std_logic_vector(resize(unsigned(s_gray_out),s_blue_out'length));
@@ -400,15 +377,12 @@ s_axi_rready <= '0';
 s_axi_rdata <= (others=>'0');
 
 -- setting resets
---s_axi_aresetn <= '0';
 rst_n <= '1';
 pixel_rst_n <= '1';
 wait for clk_period;
---en <= '2';
 rst_n <= '0'; 
 pixel_rst_n <= '0';
 wait for clk_period;
---s_axi_aresetn <= '1';
 rst_n <= '1';
 pixel_rst_n <= '1';
 
@@ -486,19 +460,18 @@ s_axis_tlast <= '0';
 wait for clk_period;
 
 nd <='1';
---nd <='1';
 start_read <='0';
 
 -- for testing not consistent new data on axi uncomment the following lines
 
 wait for 30*clk_period;
 for i in 0 to 10000 loop
-    if (i mod 3 = 0) then
+  if (i mod 3 = 0) then
     nd <= '0';
 		 else
     nd <='1';
   end if;
-  wait for 1*clk_period;
+wait for 1*clk_period;
 end loop;
 
 nd <='1';
@@ -522,14 +495,13 @@ nd <='1';
 
 wait for 30*clk_period;
 for i in 0 to 10000 loop
-    if (i mod 3 = 0) then
+  if (i mod 3 = 0) then
     nd <= '0';
-		 else
+	else
     nd <='1';
   end if;
   wait for 1*clk_period;
 end loop;
-
 
 wait;
 end process;

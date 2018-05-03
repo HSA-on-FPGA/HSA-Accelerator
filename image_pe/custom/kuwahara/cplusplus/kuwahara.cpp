@@ -19,9 +19,7 @@
 
 #include "kuwahara.h"
 #include <iostream>
-//#include <ap_int.h>
 #include <hls_stream.h>
-
 
 
 myint_16 kuwahara(myint_16 din0[VEC_SIZE]) 

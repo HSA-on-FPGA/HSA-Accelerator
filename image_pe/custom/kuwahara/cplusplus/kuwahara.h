@@ -20,8 +20,6 @@
 #ifndef MY_DEF
 #define MY_DEF
 
-//#include <cmath>
-//#include <stdint.h>
 #include <ap_int.h>
 #include <hls_stream.h>
 
@@ -29,7 +27,6 @@ using namespace std;
 
 #define HW_COSIM
 
-//#define VEC_SIZE 9
 #define WINDOW_WIDTH 5 // should be ought
 #define WINDOW_HEIGHT 5 // should be same as width
 #define VEC_SIZE (WINDOW_WIDTH*WINDOW_HEIGHT)
@@ -42,7 +39,6 @@ typedef ap_uint<8> myint_8;
 typedef ap_uint<16> myint_16;
 typedef ap_uint<2> uint_2;
 typedef ap_int<30> int_17;
-//typedef ap_uint<2> uint_2;
 typedef ap_uint<16> uint_16;
 typedef ap_uint<21> uint_21;
 

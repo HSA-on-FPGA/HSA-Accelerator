@@ -17,14 +17,11 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 --
 
-
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 use IEEE.math_real.all;
-
-
 
 entity tb_scale_top is
 end tb_scale_top;
@@ -82,9 +79,6 @@ begin
             in_data <= std_logic_vector(next_data);
             wait until clk = '0';
             wait until clk = '1';
-            --if(in_ready = '1') then
-            --    next_data := next_data + 1;
-            --end if;
         end loop;
 
     end process;

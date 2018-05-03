@@ -53,32 +53,19 @@ end axis_to_pixel_gen;
 architecture behavior of axis_to_pixel_gen is
 
 
---type COLOR_MAPPING_STATE is (r_bgr,gr_bg,bgr_b, write_staged);
---type GRAY_MAPPING_STATE is (word_read, write_staged);
 
---signal s_color_st, s_next_color_st : COLOR_MAPPING_STATE;
---signal s_gray_st, s_next_gray_st : GRAY_MAPPING_STATE;
 
 signal s_di : std_logic_vector (DATA_IN_WIDTH-1 downto 0);
 signal s_do_color : std_logic_vector (PAR*COL_NUM*COLOR_WIDTH-1 downto 0);
 signal s_do_gray : std_logic_vector (PAR*GRAY_WIDTH-1 downto 0);
 
 signal s_color_pixel_valid, s_gray_pixel_valid, s_color_tready,s_gray_tready :std_logic;
---signal s_tlast, s_valid : std_logic;
 -- signals for debug
 
 alias clk : std_logic is S_AXIS_ACLK;
 alias rst_n : std_logic is S_AXIS_ARESETN;
 
-
-
---constant c_color_fill : std_logic_vector(7 downto 0):=(others=>'0');
---constant c_gray_fill : std_logic_vector(15 downto 0):=(others=>'0');
-
-
 begin
-
-
 
 rout <= s_do_color(PAR*COLOR_WIDTH-1 downto 0); --FIX later
 gout <= s_do_color(2*PAR*COLOR_WIDTH-1 downto PAR*COLOR_WIDTH); -- FIX
@@ -97,9 +84,7 @@ begin
 		S_AXIS_TREADY <= s_gray_tready; 
 	end if;
 end process; 
---valid <= S_AXIS_TVALID;
 s_di <= S_AXIS_TDATA;
---S_AXIS_TREADY <= s_tready;
 
 
 gray_inst: entity work.scale
@@ -135,8 +120,5 @@ gen_color_scale: if COL_NUM>1 generate
 	  out_data => s_do_color
   );
 end generate;
-
-
-
 
 end behavior;

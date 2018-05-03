@@ -26,7 +26,6 @@ generic(
 );
 port(
   clk   : in  std_logic;
- -- rst_n : in  std_logic;
   en    : in  std_logic;
   di    : in  std_logic_vector(g_valuewidth-1 downto 0);
   do    : out std_logic_vector(g_valuewidth-1 downto 0)
@@ -40,8 +39,6 @@ begin
 regproc: process(clk) 
 begin
   if(clk'event and clk ='1') then
---    if (rst_n = '0') then
-      --do <= (others =>'0');
     if(en='1') then
       do <= di;
     end if;

@@ -40,8 +40,6 @@ Port (
   M_AXIS_ARESETN  : in std_logic;
   M_AXIS_TVALID : out std_logic;
   M_AXIS_TDATA  : out std_logic_vector(C_M_AXIS_TDATA_WIDTH-1 downto 0);
---  M_AXIS_TSTRB  : out std_logic_vector((C_M_AXIS_TDATA_WIDTH/8)-1 downto 0);
---  M_AXIS_TLAST  : out std_logic; -- for future use
   M_AXIS_TREADY : in std_logic
 );
 end pixel_to_axis;
@@ -108,15 +106,11 @@ end process;
 
 color_state: process(s_color_st,s_rgb_staged,s_di_color,s_shift_valid)
 begin
---  s_rgb_shift <= (others=>'0');
   s_do_color <= (others=>'0');
   s_color_pixel_valid <= '0';
   
   case s_color_st is
     when insert_rgbr =>
---        s_next_color_st <= insert_rgbr;
---        s_do <= (others=>'0');
---        s_pixel_valid <= '0';
   
       if(s_shift_valid ='1') then
           -- s_di         |b|g|r|
@@ -126,9 +120,6 @@ begin
         s_next_color_st <= write_rbgr;
       end if;
     when write_rbgr =>
---        s_next_color_st <= write_rbgr;
---        s_do <= (others=>'0');
---        s_pixel_valid <= '0';
   
       if(s_shift_valid ='1') then
           -- s_di          |b|g|r|
@@ -142,9 +133,6 @@ begin
         s_next_color_st <= write_grbg;
       end if;
     when write_grbg =>
---        s_next_color_st <= write_grbg;
---        s_do <= (others=>'0');
---        s_pixel_valid <= '0';
   
       if(s_shift_valid='1') then
           -- s_di          |b|g|r|
@@ -158,9 +146,6 @@ begin
         s_next_color_st <= write_bgrb; 
       end if;
     when write_bgrb => 
---        s_next_color_st <= write_grbg;
---        s_do <= (others=>'0');
---        s_pixel_valid <= '0';
   
       if(s_shift_valid='1') then
           -- s_di          |b|g|r|
@@ -174,10 +159,6 @@ begin
     when others => null;
   end case;
 end process;
-
-
--- State mashine for color conversion
-
 
 gray_sync: process(clk)
 begin

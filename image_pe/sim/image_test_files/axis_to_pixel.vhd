@@ -65,11 +65,7 @@ signal s_tlast, s_valid : std_logic;
 alias clk : std_logic is S_AXIS_ACLK;
 alias rst_n : std_logic is S_AXIS_ARESETN;
 
-
-
 constant c_color_fill : std_logic_vector(7 downto 0):=(others=>'0');
---constant c_gray_fill : std_logic_vector(15 downto 0):=(others=>'0');
-
 
 begin
 
@@ -104,13 +100,10 @@ begin
 		S_AXIS_TREADY <= s_gray_tready; 
 	end if;
 end process; 
---valid <= S_AXIS_TVALID;
 s_shift_valid <= S_AXIS_TVALID;
 s_di <= S_AXIS_TDATA;
---S_AXIS_TREADY <= s_tready;
 
 -- State mashine for color conversion
-
 
 color_sync: process(clk)
 begin
@@ -131,7 +124,6 @@ end process;
 
 color_state: process(s_color_st, s_shift_valid,s_di,s_rgb_staged)
 begin
---  s_rgb_shift <= (others=>'0');
   s_do_color <= (others=>'0');
   s_color_pixel_valid <= '0';
   s_color_tready <= '1';

@@ -47,7 +47,6 @@ signal en,nd, rst_n,start_read, valid_out,pixel_read, pixel_valid,pixel_read_nex
 signal s_color: std_logic_vector(c_dw-1 downto 0);
 signal s_color_cnt: unsigned(1 downto 0);
 signal s_byte_four,s_byte_three,s_byte_two, s_byte_one : std_logic_vector(c_pixw-1 downto 0);
---signal s_byte_four_out,s_byte_three_out,s_byte_two_out, s_byte_one_out : std_logic_vector(c_pixw-1 downto 0);
 
 ------ axi lite signals -------
 
@@ -106,15 +105,11 @@ alias cclk : std_logic is s_axi_aclk;
 constant cclk_period : time:= 2 ns;
 constant iclk_period : time:= 2 ns;
 constant oclk_period : time:= 2 ns;
---constant pe_clk_period : time:= 4 ns; 
-
 
 --- Setting Configurations for Image
 
 constant c_imagewidth: integer:= 128;
 constant c_imageheight: integer:= 128;
---constant c_imagewidth: integer:= 20;
---constant c_imageheight: integer:= 20;
 constant c_numpix: integer:= c_imagewidth*c_imageheight; 
 constant c_windowwidth: integer:= 5;
 constant c_windowheight: integer:= 5;
@@ -123,7 +118,6 @@ constant c_normval: integer:= 8;
 
 -- Constance for Intefaces
 constant c_par_ext: integer:= 1;
---constant c_axi_conf_width: integer:= 32;
 
 
 --- Setting Configurations for Kernel Operation, see package file
@@ -176,15 +170,11 @@ begin
 
 a_reserved <=(others=>'0');
 a_color <= '1';
-a_boarder <= "01";
+a_boarder <= "01"; -- option for zero pad, other options are not supported!!
 a_kernelop <= "000";
 a_norm_tresh <= '1';
 
---s_red <= std_logic_vector(to_unsigned(1,c_pixw));
---s_green <= std_logic_vector(to_unsigned(2,c_pixw));
---s_blue <= std_logic_vector(to_unsigned(3,c_pixw));
-
--- correct coeeff mapping
+-- correct coeff mapping
 
 coeff_con:for i in 0 to c_vecsize-1 generate
   s_coeff_one(i) <= std_logic_vector(to_signed(s_coeffint_one(i),c_regw));
@@ -203,13 +193,13 @@ port map (
 -----------------------------------
 -----------Slave AXI Lite Ports----
 -----------------------------------
+
 -- System Signals
   S_AXI_ACLK    => s_axi_aclk, --in
   S_AXI_ARESETN  => s_axi_aresetn, -- in
 
   -- Slave Interface Write Address Ports
   S_AXI_AWADDR   => s_axi_awaddr, -- in regw
-  --    S_AXI_AWPROT   : in  std_logic_vector(3-1 downto 0); -- required??
   S_AXI_AWVALID  => s_axi_awvalid, -- in
   S_AXI_AWREADY  => s_axi_awready, -- out
 
@@ -226,7 +216,6 @@ port map (
 
   -- Slave Interface Read Address Ports
   S_AXI_ARADDR  => s_axi_araddr, -- in regw
-  --    S_AXI_ARPROT   : in  std_logic_vector(3-1 downto 0); -- required???
   S_AXI_ARVALID => s_axi_arvalid, -- in 
   S_AXI_ARREADY => s_axi_arready, -- out
 
@@ -259,40 +248,15 @@ port map (
   ---------------------------------
   ------------PE Ports ------------
   ---------------------------------
---  pe_clk => pe_clk, --in
   en  => en, --in
   rst_n => rst_n, --in
   start_read => start_read --in
 );
 
 
---process(s_axis_aclk)
---begin
---  if s_axis_aclk'event and s_axis_aclk='1' then
---    pixel_read_next <= nd;
---  end if;
---end process;
-
 pixel_read <= pixel_valid and s_axis_tready;
 
 s_gray <= std_logic_vector(resize(unsigned(s_red),c_par_ext*16));
-    
---pixel_to_axis_conv: entity work.pixel_to_axis
---port map (
-   --  pixel stream side
---  rin => s_red,
---  gin => s_green,
---  bin => s_blue,
---	nd => pixel_read,
---	gray => a_color, 
---	grayin => s_gray,    
---  ----- Master AXI Stream Ports----
---  M_AXIS_ACLK => s_axis_aclk,
---  M_AXIS_ARESETN => s_axis_aresetn,
---  M_AXIS_TVALID => s_axis_tvalid,
---  M_AXIS_TDATA  => s_axis_tdata,
---  M_AXIS_TREADY => s_axis_tready
---);
 
 pixel_to_axis_conv: entity work.pixel_to_axis_gen
 generic map(
@@ -314,23 +278,6 @@ port map (
   M_AXIS_TDATA  => s_axis_tdata,
   M_AXIS_TREADY => s_axis_tready
 );
---axis_to_pixel_conv: entity work.axis_to_pixel
---port map (
---   --  pixel stream side
---  rout => s_red_conv,
---  gout => s_green_conv,
---  bout => s_blue_conv,
---	gray => a_color,
---	valid => valid_out,    
---	grayout => s_gray_out, --TODO fix me for gray image test    
---  ----- Master AXI Stream Ports----
---  S_AXIS_ACLK => m_axis_aclk,
---  S_AXIS_ARESETN => m_axis_aresetn,
---  S_AXIS_TVALID => m_axis_tvalid,
---  S_AXIS_TDATA  => m_axis_tdata,
---  s_AXIS_TLAST => m_axis_tlast,
---  S_AXIS_TREADY => m_axis_tready
---);
 
 axis_to_pixel_conv: entity work.axis_to_pixel_gen
 generic map(
@@ -346,7 +293,7 @@ port map (
 	valid => valid_out,    
 	grayout => s_gray_out,
   out_ready => '1',  
-  ----- Master AXI Stream Ports----
+  ----- Master AXI stream ports----
   S_AXIS_ACLK => m_axis_aclk,
   S_AXIS_ARESETN => m_axis_aresetn,
   S_AXIS_TVALID => m_axis_tvalid,
@@ -384,7 +331,7 @@ begin
 		s_red_out <= s_red_conv;
 		s_green_out <= s_green_conv;
 		s_blue_out <= s_blue_conv;
-  else -- TODO change later to 16 bit output
+  else 
     s_red_out <= std_logic_vector(resize(unsigned(s_gray_out),s_red_out'length));
     s_green_out <= std_logic_vector(resize(unsigned(s_gray_out),s_green_out'length));
     s_blue_out <= std_logic_vector(resize(unsigned(s_gray_out),s_blue_out'length));
@@ -454,7 +401,6 @@ s_axis_aresetn <= '0';
 s_axi_aresetn <= '0';
 rst_n <= '1';
 wait for 100*iclk_period;
---en <= '2';
 rst_n <= '0'; -- long reset phase needed for fifos, for some reason
 wait for 100*iclk_period;
 m_axis_aresetn <= '1';
@@ -545,7 +491,6 @@ s_axis_tlast <= '0';
 wait for iclk_period;
 
 nd <='1';
---nd <='1';
 start_read <='0';
 
 -- for testing not consistent new data on axi uncomment the following lines
@@ -557,10 +502,9 @@ for i in 0 to 10000 loop
 		 else
     nd <='1';
   end if;
-  wait for 1*iclk_period;
+wait for 1*iclk_period;
 end loop;
 
---wait for iclk_period;
 nd <='1';
 
 -- end of consistence testing
@@ -568,52 +512,11 @@ nd <='1';
 wait;
 end process;
 
-
---tready_check:process
---begin
-
---wait until m_axis_tvalid ='1';
---_out_ready<= '0';
---wait for 10000*oclk_period;
---s_out_ready<= '1';
---wait;
-
---end process;
-
---TODO test if following not needed
-
---stream_proc: process
---begin
-
--- AXI stream slave signals --
-
---s_axis_tvalid <= '0';
---s_axis_tdata <= (others=>'0');
---m_axis_tready <= '0';
---nd <='0';
---wait until start_read='1'and iclk'event and iclk ='1';
---m_axis_tready <= '1';
---s_axis_tvalid <='1';
---loop
---  wait until iclk'event and iclk ='1';
-	--	if(s_color_cnt="10") then
-	--	else
-  --    s_color_cnt <= s_color_cnt+1;
-  --  end if;
---end loop;
---end process;
-
 -- signals for debug
 
 s_byte_four <= M_AXIS_TDATA(31 downto 24);
 s_byte_three <= M_AXIS_TDATA(23 downto 16);
 s_byte_two <= M_AXIS_TDATA(15 downto 8);
 s_byte_one <= M_AXIS_TDATA(7 downto 0);
-
---s_byte_four_out <= S_AXIS_TDATA(31 downto 24);
---s_byte_three_out <= S_AXIS_TDATA(23 downto 16);
---s_byte_two_out <= S_AXIS_TDATA(15 downto 8);
---s_byte_one_out <= S_AXIS_TDATA(7 downto 0);
-
 
 end behavior;

@@ -31,7 +31,6 @@ add wave -radix unsigned tb_image_test/*
 add wave -noupdate -divider -height 32 Pixgen
 add wave -radix unsigned tb_image_test/pix_gen/*
 
-
 add wave -noupdate -divider -height 32 Acclerator
 add wave -radix unsigned tb_image_test/uut/*
 
@@ -41,14 +40,10 @@ add wave -radix unsigned tb_image_test/uut/accel_control/*
 add wave -noupdate -divider -height 32 Kernel
 add wave -radix unsigned tb_image_test/uut/multicol_gen/col_gen(0)/kernel_uut/*
 
-#add wave -noupdate -divider -height 32 Kernel_gray
-#add wave -radix unsigned tb_image_test/uut/kernel_clb_gray/*
-
-
 # Load Image to Memory of tb
 mem load -infile tools/mem_init.mem -format hex /tb_image_test/pix_gen/mem_r
 
-#set short signal names
+#Set short signal names
 config wave -signalnamewidth 1
 
 # Run Simulation
@@ -58,5 +53,3 @@ run 380 us
 mem save -outfile tools/mem_res.mem -noaddress -wordsperline 1 -format hex /tb_image_test/pix_gen/mem_w
 # Convert mem file to image
 exec tools/res
-# open image, requires gimp
-# gimp tools/output.ppm

@@ -46,7 +46,6 @@ type VEC_COEFF is array(0 to c_vecsize-1) of std_logic_vector(c_regw-1 downto 0)
 constant cclk_period : time:= 10 ns;
 constant iclk_period : time:= 10 ns;
 constant oclk_period : time:= 10 ns;
---constant pe_clk_period : time:= 10 ns;
 
 signal en,nd, rst_n,start_read, valid_out : std_logic;
 -- signal for input
@@ -120,7 +119,6 @@ signal s_normval: integer:= 4;
 
 --- Setting Configurations for Kernel Operation, see package file
 
-
 signal s_coeff_one: VEC_COEFF;
 signal s_coeff_two: VEC_COEFF;
 --signal s_coeffint_one: VEC_KERINT:=(0,0,0,0,0,
@@ -161,13 +159,9 @@ begin
 
 a_reserved <=(others=>'0');
 a_color <= '0';
-a_border <= "01";
+a_border <= "01"; -- option for zero pad, other options are not supported for now!!
 a_kernelop <= "000";
 a_norm_tresh <= '0';
-
---s_red <= std_logic_vector(to_unsigned(1,c_pixw));
---s_green <= std_logic_vector(to_unsigned(2,c_pixw));
---s_blue <= std_logic_vector(to_unsigned(3,c_pixw));
 
 s_grayin <= c_color_fill & s_red;
 
@@ -192,7 +186,6 @@ port map (
 
   -- Slave Interface Write Address Ports
   S_AXI_AWADDR   => s_axi_awaddr, -- in regw
-  --    S_AXI_AWPROT   : in  std_logic_vector(3-1 downto 0); -- required??
   S_AXI_AWVALID  => s_axi_awvalid, -- in
   S_AXI_AWREADY  => s_axi_awready, -- out
 
@@ -209,7 +202,6 @@ port map (
 
   -- Slave Interface Read Address Ports
   S_AXI_ARADDR  => s_axi_araddr, -- in regw
-  --    S_AXI_ARPROT   : in  std_logic_vector(3-1 downto 0); -- required???
   S_AXI_ARVALID => s_axi_arvalid, -- in 
   S_AXI_ARREADY => s_axi_arready, -- out
 
@@ -242,7 +234,6 @@ port map (
   ---------------------------------
   ------------PE Ports ------------
   ---------------------------------
-  --pe_clk => pe_clk, --in
   en  => en, --in
   rst_n => rst_n, --in
   start_read => start_read --in
@@ -458,55 +449,14 @@ s_axis_tkeep <= (others=>'1');
 s_axis_tlast <= '0';
 
 wait until start_read='1'and iclk'event and iclk ='1';
---m_axis_tready <= '1';
 s_color_cnt <= (others=>'0');
---s_axis_tvalid <='1';
 loop
   wait until iclk'event and iclk ='1';
     if(nd='1') then
       s_green <= std_logic_vector(unsigned(s_green)+1);
---      s_red <= std_logic_vector(unsigned(s_red)+1);
 	  end if;
-	--	else
-  --    s_color_cnt <= s_color_cnt+1;
-  --  end if;
 end loop;
 end process;
-
---s_axis_tdata <= s_color;
-
-
---color_pattern: process(s_color_cnt)
---begin
---  if (s_color_cnt="00") then
---    s_color <= s_red & s_blue & s_green & s_red;
---      s_color <= s_green & s_red & s_red & s_red; -- pixel test
---  elsif(s_color_cnt="01") then
---	  s_color <= s_green & s_red & s_blue & s_green;
---      s_color <= s_blue & s_blue & s_green & s_green; -- pixel test
---  elsif(s_color_cnt="10") then
---    s_color <= s_blue & s_green & s_red & s_blue;
---      s_color <= s_red & s_red & s_red & s_blue; -- pixel test
---  end if;
---end process;
-
--- counter for pixel increase
-
---pixel_cnt: process(iclk)
---begin
---  if(iclk'event and iclk='1') then
---    if s_color_cnt="10" then
---			s_red <= std_logic_vector(unsigned(s_red)+1);
---			s_green <= std_logic_vector(unsigned(s_green)+1);
---			s_blue <= std_logic_vector(unsigned(s_blue)+1);
---		else
---			s_red <=s_red;
---			s_green <= s_green;
---			s_blue <= s_blue;
---		end if;
---	end if;
---end process;
-
 
 -- signals for debug
 

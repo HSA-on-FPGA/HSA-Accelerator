@@ -38,8 +38,6 @@ architecture behavior of minmax2 is
 
 constant c_val_minmax : integer:= g_valuewidth+g_vectoraddrwidth;
 signal  s_bcomp,s_acomp : unsigned(g_valuewidth-1 downto 0);
---signal  s_a,s_b : std_logic_vector(c_val_minmax-1 downto 0);
---signal  s_val :std_logic_vector(c_val_minmax-1 downto 0);
 
 begin
   

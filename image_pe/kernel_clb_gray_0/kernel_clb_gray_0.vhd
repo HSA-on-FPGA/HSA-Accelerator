@@ -29,7 +29,7 @@ port(
   clk   : in  std_logic;
   rst_n : in  std_logic;
   en    : in  std_logic; -- Global enable signal
-  -- Control Line Infertace
+  -- Control line lnfertace
   nd    : in  std_logic; -- New Data for valid input pixel
   valid : out std_logic;  -- Output has valid information
   next_valid : out std_logic;  -- Output has valid information
@@ -64,10 +64,8 @@ constant c_num_ckernel: integer:= c_num_custom_kernel_0; -- only in gray buffer 
 
 constant c_vecsize: integer:= c_ww*c_wh;
 
---type VEC_SORTLIN is array (0 to c_par-1) of std_logic_vector(c_vecsize*c_dw-1 downto 0);
 type VEC_LIN is array (0 to c_par-1) of std_logic_vector(c_vecsize*c_dw-1 downto 0);
 type VEC_CONVLIN is array (0 to c_par-1) of std_logic_vector(c_vecsize*c_convw-1 downto 0);
---type ARRAY_SECMUX is array (c_wh_max_0-1 downto 0) of VEC_SECMUX;
 
 type VEC_KEROUT is array (0 to c_par-1) of std_logic_vector(c_dw-1 downto 0);
 type VEC_CONVOUT is array (0 to c_par-1) of std_logic_vector(2*c_convw-1 downto 0);
@@ -79,7 +77,6 @@ type VEC_VALID is array(0 to c_par-1) of std_logic_vector(c_num_kernel+c_num_cke
 
 signal s_valid, s_valid_comp: std_logic_vector(c_par-1 downto 0); -- help signal
 
---signal s_envec: std_logic_vector(c_num_kernel+c_num_ckernel-1 downto 0);
 signal s_envec: std_logic_vector(c_num_kernel+1-1 downto 0); --FIXME
 signal s_validvec: VEC_VALID;
 signal s_kmode : std_logic_vector(c_kinstrw-2 downto 0);
@@ -87,6 +84,7 @@ signal s_coeff_one, s_coeff_two : std_logic_vector(c_vecsize*c_convw-1 downto 0)
 
 
 signal s_sortlin   : VEC_LIN;
+
 -- only for gray buffer!!
 signal s_customlin : VEC_LIN;
 signal s_custom_out : VEC_KEROUT;
@@ -106,8 +104,6 @@ signal s_rank_out  : VEC_KEROUT;
 signal s_tresh_out : VEC_KEROUT;
 signal s_norm_out : VEC_KEROUT;
 
--- Specific Kernel enable signals for Sort Kernel
--- signal s_enmed, s_enero, s_endil : std_logic;
 
 
 begin
@@ -121,9 +117,9 @@ con_coeff: for i in  0 to c_vecsize-1  generate
   s_coeff_one((i+1)*c_convw-1 downto i*c_convw) <= std_logic_vector(resize(signed(coeff_one(i)),c_convw));
   s_coeff_two((i+1)*c_convw-1 downto i*c_convw) <= std_logic_vector(resize(signed(coeff_two(i)),c_convw));
 end generate;
+
+
 -- enables correct kernel
-
-
 
 en_kernel: process(s_kmode)
   variable v_kmode: integer;
@@ -180,7 +176,6 @@ generic map(
 port map(
   clk   => clk,
   rst_n => rst_n,
---  en    => s_envec(1),
   en    => nd,
   nd    => nd,
   valid => s_validvec(i)(1),
@@ -197,7 +192,7 @@ generic map(
 port map(
   clk   => clk,
   rst   => rst_n, -- change name to rst_n
-  en    => nd, -- fixme!!
+  en    => nd, 
   nd    => nd,
   valid => s_validvec(i)(2),
   data_in => s_sortlin(i),
@@ -227,7 +222,7 @@ norm_proc: process(s_conv_one_out, norm,kinstr)
   variable v_normflag: std_logic; 
   variable v_norm : unsigned(c_normw-1 downto 0);
   variable v_conv_one : unsigned(c_dw-1 downto 0);
-begin --TODO value to small for shifting 
+begin  
   v_normflag:= kinstr(0);
   v_norm:= unsigned(norm);
 if(v_normflag ='1') then
@@ -240,6 +235,7 @@ end process;
 s_norm_out(i) <= s_norm_ext_out(i)(c_dw-1 downto 0);
 
 -- calculation for gradient e.g sobel value
+
 s_conv_absadd(i) <= std_logic_vector(abs(signed(s_conv_one_out(i))) + abs(signed(s_conv_two_out(i))));
 s_conv_addcut(i) <= s_conv_absadd(i)(c_dw-1 downto 0);
 
@@ -292,45 +288,6 @@ else
   s_rank_out(i) <= (others=>'0');
 end if;
 end process;
-
--- passing out correct signal to do port
-
---wb_proc: process(clk)
---  variable v_kmode: integer;
---begin
-
---if(clk'event and clk='1') then
---  if(rst_n='0') then
---    do((i+1)*c_dw-1 downto i*c_dw) <= (others=>'0');
---    s_valid(i) <= '0';
---  elsif(en='1') then
---    v_kmode := to_integer(unsigned(s_kmode));
---    if(v_kmode = 0) then
---			if(nd='1') then
---        do((i+1)*c_dw-1 downto i*c_dw) <= s_norm_out(i);
---      end if;
---      s_valid(i) <= s_validvec(i)(0);
---    elsif(v_kmode = 1) then
---			if(nd='1') then
---        do((i+1)*c_dw-1 downto i*c_dw) <= s_tresh_out(i);
---      end if;
---      s_valid(i) <= s_validvec(i)(1);
---    elsif(v_kmode >= 2 and v_kmode < 5) then
---			if(nd='1') then
---        do((i+1)*c_dw-1 downto i*c_dw) <= s_rank_out(i);
---      end if;
---      s_valid(i) <= s_validvec(i)(2);
---    elsif( c_num_ckernel > 0 and v_kmode = 5) then
---			if(nd='1') then
---        do((i+1)*c_dw-1 downto i*c_dw) <= s_custom_out(i);
---      end if;
---      s_valid(i) <= s_validvec(i)(3);
---    end if;
---  end if;
---end if;
---end process;
-
---
 
 wb_proc: process(s_kmode,s_tresh_out,s_rank_out, s_norm_out, s_validvec)
   variable v_kmode: integer;

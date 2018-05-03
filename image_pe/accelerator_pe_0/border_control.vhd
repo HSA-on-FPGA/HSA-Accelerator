@@ -62,18 +62,8 @@ begin
       s_x_cnt <= (others =>'0');
       s_y_cnt <= (others =>'0');
     elsif border_en='1' and nd='1'then
-
-    s_x_cnt <= s_x_cnt_nxt;
-    s_y_cnt <= s_y_cnt_nxt;
---      if s_x_cnt = unsigned(iw)-1 then -- check if correct
---        s_x_cnt <= (others=>'0');
---        s_y_cnt <= s_y_cnt+1;
---      else
---        s_x_cnt <= s_x_cnt+PAR; -- shift pixel depends on PAR
---      end if;
---      if s_y_cnt = unsigned(ih)-1 and s_x_cnt = unsigned(iw)-1 then
---        s_y_cnt <= (others =>'0');
---      end if;
+      s_x_cnt <= s_x_cnt_nxt;
+      s_y_cnt <= s_y_cnt_nxt;
     end if;
   end if;
 end process;
@@ -122,8 +112,6 @@ begin
   if v_x_cnt > unsigned(iw)-1 then -- check if correct
       v_x_cnt := (others=>'0');
       v_y_cnt := v_y_cnt+1;
---  else
---      v_x_cnt := v_x_cnt+PAR; -- shift pixel depends on PAR
   end if;
   if v_y_cnt >= unsigned(ih) and v_x_cnt >= unsigned(iw) then
      v_y_cnt := (others =>'0');

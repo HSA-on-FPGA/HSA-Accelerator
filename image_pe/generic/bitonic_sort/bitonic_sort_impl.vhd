@@ -105,7 +105,6 @@ begin
                     port map(
                         clk => clk,
                         en => en,
-                        -- TODO di, do
                         di => do_connections(I),
                         data_in => data_connections(I)((I2+1) * ELEMENT_SIZE * ARRAY_SIZE/(2**(I+1)) - 1 downto I2 * ELEMENT_SIZE * ARRAY_SIZE/(2**(I+1))),
                         data_out => data_connections(I+1)((I2+1) * ELEMENT_SIZE * ARRAY_SIZE/(2**(I+1)) - 1 downto I2 * ELEMENT_SIZE * ARRAY_SIZE/(2**(I+1))),

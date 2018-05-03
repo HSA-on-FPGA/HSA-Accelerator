@@ -22,13 +22,11 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 use work.pkg_functions.all;
---use work.pkg_config.all;  -- missing values for config!!!
 
 entity acc is
 generic(
 	g_valuewidth		: natural;
 	g_vectorsize		: natural
---	g_vectoraddrwidth	: natural:= c_addr_acc_0
 );
 port(
 	clk		: in  std_logic;
@@ -111,7 +109,6 @@ end component;
 
 begin
 
--- s_nd <= nd; -- help signal for mapping std_logic to std_logic_vector
 
 readin: for i in 0 to g_vectorsize-1 generate
 begin
@@ -139,7 +136,6 @@ addgenout: for i in 0 to c_vectoraddrwidth-1 generate
 		)
 		port map(
 			clk		=> clk,
---			rst_n	=> rst_n,
 			en		=> en,
 			di		=> s_regin(i)(j),
 			do		=> s_addin(i+1)(j)   --output to next stage
@@ -167,7 +163,6 @@ addgenout: for i in 0 to c_vectoraddrwidth-1 generate
 		)
 		port map(
 			clk		=> clk,
---			rst_n	=> rst_n,
 			en		=> en,
 			di		=> s_regin(i)(j),
 			do		=> s_addin(i+1)(j)  --output to next stage
@@ -191,7 +186,6 @@ addgenout: for i in 0 to c_vectoraddrwidth-1 generate
 	)
 	port map(
 		clk		=> clk,
---		rst_n	=> rst_n,
 		en		=> en,
 		di		=> s_unevenval(i),
 		do		=> s_addin(i+1)(udiv(g_vectorsize,i+1)-1)	  --output to next stage
@@ -233,6 +227,5 @@ enoutputgen: if(c_uneven = c_vectoraddrwidth) generate -- if first uneven value 
 	);
 end generate;
 
---valid <= s_acc_valid and nd;
 
 end behavior;

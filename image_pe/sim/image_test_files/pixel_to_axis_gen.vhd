@@ -44,29 +44,15 @@ Port (
   M_AXIS_ARESETN  : in std_logic;
   M_AXIS_TVALID : out std_logic;
   M_AXIS_TDATA  : out std_logic_vector(DATA_OUT_WIDTH-1 downto 0);
---  M_AXIS_TSTRB  : out std_logic_vector((C_M_AXIS_TDATA_WIDTH/8)-1 downto 0);
---  M_AXIS_TLAST  : out std_logic; -- for future use
   M_AXIS_TREADY : in std_logic
 );
 end pixel_to_axis_gen;
 
 architecture behavior of pixel_to_axis_gen is
 
---type COLOR_MAPPING_STATE is (insert_rgbr,write_rbgr,write_grbg,write_bgrb);
---type GRAY_MAPPING_STATE is (word_read,write_staged);
-
---signal s_color_st, s_next_color_st : COLOR_MAPPING_STATE;
---signal s_gray_st, s_next_gray_st : GRAY_MAPPING_STATE;
-
 signal s_di_color :std_logic_vector(PAR*COL_NUM*COLOR_WIDTH-1 downto 0);
 signal s_di_gray  :std_logic_vector(PAR*GRAY_WIDTH-1 downto 0);
---signal s_rgb_staged, s_rgb_shift : std_logic_vector(23 downto 0);
---signal s_gray_staged, s_gray_shift : std_logic_vector(15 downto 0);
 signal s_do_gray, s_do_color : std_logic_vector(DATA_OUT_WIDTH-1 downto 0);
---signal s_do_color :std_logic_vector(31 downto 0);
-
---constant c_color_fill : std_logic_vector(7 downto 0):= (others=>'0');
-
 signal s_gray_pixel_valid, s_color_pixel_valid: std_logic ;
 
 
@@ -77,14 +63,14 @@ begin
 
 
 s_di_gray <= grayin;
-s_di_color <= bin & gin & rin; -- TODO FIX later
+s_di_color <= bin & gin & rin; 
 
 
 
 gray_inst: entity work.scale
 generic map(
-  DATA_IN_WIDTH => PAR*GRAY_WIDTH, -- change later
-  DATA_OUT_WIDTH => DATA_OUT_WIDTH -- change later
+  DATA_IN_WIDTH => PAR*GRAY_WIDTH, 
+  DATA_OUT_WIDTH => DATA_OUT_WIDTH 
 )
 port map(
   clk => clk,
@@ -100,8 +86,8 @@ port map(
 gen_color_scale: if COL_NUM>1 generate
   color_inst: entity work.scale
   generic map(
-    DATA_IN_WIDTH => PAR*COL_NUM*COLOR_WIDTH, -- change later
-    DATA_OUT_WIDTH => DATA_OUT_WIDTH -- change later
+    DATA_IN_WIDTH => PAR*COL_NUM*COLOR_WIDTH, 
+    DATA_OUT_WIDTH => DATA_OUT_WIDTH 
   )
   port map(
     clk => clk,
@@ -114,9 +100,6 @@ gen_color_scale: if COL_NUM>1 generate
 	  out_data => s_do_color
   );
 end generate;
-
-
-
 
 out_mux:process(s_gray_pixel_valid,s_color_pixel_valid,s_do_color,s_do_gray, gray)
 begin

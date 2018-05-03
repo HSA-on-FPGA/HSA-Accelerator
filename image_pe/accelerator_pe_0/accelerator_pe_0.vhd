@@ -21,7 +21,6 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.math_real.all;
---use work.pkg_functions.all;
 use work.pkg_config.all;
 
 entity accelerator_pe_0 is
@@ -32,7 +31,7 @@ port(
   clk   : in  std_logic;
   rst_n : in  std_logic;
   en    : in  std_logic; -- Global enable signal
-  -- Control Line Infertace
+  -- Control line infertace
   start : in  std_logic; -- New Data for valid input pixel
   valid_in    : in  std_logic; -- New Data for valid input pixel
   ready_in   : out  std_logic; -- read request from reader side

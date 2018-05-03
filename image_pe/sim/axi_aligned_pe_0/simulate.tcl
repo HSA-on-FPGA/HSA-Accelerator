@@ -44,52 +44,23 @@ add wave -radix unsigned -color yellow tb_axi_image_test/uut/pixel_to_axi/*
 add wave -noupdate -divider -height 32 Accel_control
 add wave -radix unsigned  tb_axi_image_test/uut/accelerator/accel_control/*
 
-
-
-
 add wave -noupdate -divider -height 32 Axi_Master
 add wave -radix unsigned -color green tb_axi_image_test/uut/axi_master/*
 
 
-#add wave -noupdate -divider -height 32 Accelerator
-#add wave -color yellow -radix unsigned tb_axi_image_test/uut/accelerator/*
-
-#add wave -noupdate -divider -height 32 Kernel
-#add wave -radix unsigned tb_axi_image_test/uut/accelerator/kernel_clb_gray/*
-
-#add wave -noupdate -divider -height 32 Accel_Control
-#add wave -color yellow -radix unsigned tb_axi_image_test/uut/accelerator/accel_control/*
-
-# uncomment only if border handling is set "true" in pkg_config
-#add wave -noupdate -divider -height 32 border_control
-#add wave -color orange -radix unsigned tb_axi_image_test/uut/accelerator/border_control_gen/uborder_control/*
-
-#add wave -noupdate -divider -height 32 buffer_gray
-#add wave -color green -radix unsigned tb_axi_image_test/uut/accelerator/buffer_clb_gray/*
-
-#add wave -noupdate -divider -height 32 fullbuffer
-#add wave -color orange -radix unsigned tb_axi_image_test/uut/accelerator/buffer_clb_gray/ufbpar0/*
-
-#add wave -noupdate -divider -height 32 kernel_clb_gray
-#add wave -color yellow -radix unsigned tb_axi_image_test/uut/accelerator/kernel_clb_gray/*
-
-
-
-
-# Load Image to Memory of tb
+#Load image to memory of tb
 mem load -infile tools/mem_init.mem -format hex /tb_axi_image_test/pix_gen/mem_r
 
 #set short signal names
 config wave -signalnamewidth 1
 
-# Run Simulation
+# Run simulation
 run 200 us
 
 wave zoom full
 
-# Save Resulting Image
+# Save resulting image
 mem save -outfile tools/mem_res.mem -noaddress -wordsperline 1 -format hex /tb_axi_image_test/pix_gen/mem_w
+
 # Convert mem file to image
 exec tools/res
-# open image, requires gimp
-# gimp tools/output.ppm

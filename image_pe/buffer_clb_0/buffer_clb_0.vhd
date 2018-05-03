@@ -30,17 +30,17 @@ port(
   clk   : in  std_logic;
   rst_n : in  std_logic;
   en    : in  std_logic; -- Global enable signal
-  -- Control Line Infertace
+  -- Control line infertace
   nd    : in  std_logic; -- New Data for valid input pixel
   -- ports for controlling border handling
-  border_vec  : in std_logic_vector(((c_ww_max_0+c_par_0-1)*c_wh_max_0)-1 downto 0); -- vector forboarder handling
+  border_vec  : in std_logic_vector(((c_ww_max_0+c_par_0-1)*c_wh_max_0)-1 downto 0); -- vector for boarder handling
   border_st   : in BORDER_STATE_0;
   border_op   : in std_logic_vector(1 downto 0); -- 0 off, 1 zero pad, 2 clamp
   -- Config interface, must be constant, should only be changed, if not in processing mode  
   iw    : in std_logic_vector(c_iw_addr_0-1 downto 0); -- sets image width from config reg
   ww    : in std_logic_vector(c_ww_addr_0-1 downto 0); -- sets window width from config reg
   wh    : in std_logic_vector(c_wh_addr_0-1 downto 0); -- sets window height from config reg
-  -- Data Interace
+  -- Data interace
   di    : in  std_logic_vector(c_dw_pix_max_0 * c_par_0-1 downto 0);  
   mo    : out  ARRAY_MASKPAR_0 -- Mask in one dimension multiplied with c_par_0
 );
@@ -55,7 +55,6 @@ constant c_ww: integer:= c_ww_max_0;
 constant c_wh: integer:= c_wh_max_0;
 constant c_ww_half: integer:= (c_ww+par-1)/2;
 constant c_wh_half: integer:= c_wh/2;
---constant c_num_borderring: integer min(c_ww_half,c_wh_half);
 
 type VEC_SECMUX is array (c_ww-1 downto 0) of std_logic;
 type ARRAY_SECMUX is array (c_wh-1 downto 0) of VEC_SECMUX;
@@ -63,15 +62,9 @@ type ARRAY_SECMUX is array (c_wh-1 downto 0) of VEC_SECMUX;
 type VEC_BORDERMUX is array (c_ww+par-2 downto 0) of std_logic;
 type ARRAY_BORDERMUX is array (c_wh-1 downto 0) of VEC_BORDERMUX;
 
---type BORDER_STATE is (up_left,up, up_right, left, right, down_left, down, down_right,no_border) 
-
---type VEC_MASKPARQ is array(c_num_borderring-1 downto 0) of MASKPARQ;
-
-
 signal s_clamp, s_border_en, s_zero_pad : std_logic;
 signal s_mask : MASKPQ; -- Mask format from fbpar
 signal s_maskpar,s_borderres, s_border : MASKPARQ; -- Mask format for border handling
---signal s_border_ring, s_border_res_ring : VEC_MASKPARQ;
 signal s_swopar, s_secswopar : SWOPQPAR;
 signal s_arraysecmux: ARRAY_SECMUX;
 signal s_arraybordermux: ARRAY_BORDERMUX;
@@ -79,7 +72,6 @@ signal s_maskreg : ARRAY_MASKPAR_0;
 signal s_zero: std_logic_vector(c_dw-1 downto 0);
 signal s_border_vec:std_logic_vector(((c_ww+c_par_0-1)*c_wh)-1 downto 0);
 signal s_border_st: BORDER_STATE_0;
---signal s_border_state: BORDER_STATE;
 
 begin
 
@@ -129,7 +121,7 @@ begin
   end if;
 end process;
 
--- Reading in Border vector
+-- Reading in border vector
 
 process(border_vec,s_border_en,border_st)
 begin
@@ -142,7 +134,7 @@ begin
   end if;
 end process;
 
--- Instantiantating Mux for border handling
+-- Instantiantating mux for border handling
 
 mux_border_x: for x in q-1 downto 0 generate
   mux_border_y: for y in p+par-2 downto 0 generate
@@ -182,7 +174,6 @@ variable v_y_norm: integer;
 variable v_x_norm_abs: integer;
 variable v_y_norm_abs: integer;
 variable v_border_vec_int: integer;
---variable v_amux: ARRAY_BORDERMUX;
 begin
 v_border_vec_int := to_integer(unsigned(s_border_vec));
 
@@ -211,106 +202,6 @@ v_border_vec_int := to_integer(unsigned(s_border_vec));
           if v_i >= q*p/2 and v_i < q*p/2+par then
             s_border(x)(y) <= (others=>'0');
             s_arraybordermux(x)(y) <= '0'; 
-
--- Remove broken clamping!!
---          elsif(s_clamp='1') then
---            s_arraybordermux(x)(y) <= s_border_vec(v_i); -- pass bit from border vector
---            if s_border_st = up_left then -- border only in first three quadrants
-              -- x|x
-              -- x|-
---              if v_x_norm >= 0 or v_y_norm >= 0  then -- border in first three quadrant
---                if v_x_norm = v_y_norm then -- x = y
---                  s_border(x)(y) <= s_borderres(x-1)(y-1);
---                elsif v_x_norm > v_y_norm then  -- x > y
---                  s_border(x)(y) <= s_borderres(x-1)(y);
---                else  -- x < y
---                  s_border(x)(y) <= s_borderres(x)(y-1);
---                end if;
---              else
---                s_border(x)(y) <= (others => '0');
---              end if;
---            elsif s_border_st = up then -- border only in first two quadrants
-              -- x|x
-              -- -|-
---              if v_x_norm > 0 then
---                s_border(x)(y) <= s_borderres(x-1)(y);
---              else
---                s_border(x)(y) <= (others => '0'); 
---              end if;
-
---            elsif s_border_st = up_right then -- border only in first two quadrants
-              -- x|x
-              -- -|x
---              if not (v_x_norm <= 0 and v_y_norm >= 0) then -- if not in forth quadrant
---                if v_x_norm = -(v_y_norm) then -- x = -(y)
---                  s_border(x)(y) <= s_borderres(x-1)(y+1);
---                elsif v_x_norm > v_y_norm_abs or (v_x_norm > 0 and v_y_norm > 0)  then --- x > abs(y)
---                  s_border(x)(y) <= s_borderres(x-1)(y);
---                else       -- abs(y) > x
---                  s_border(x)(y) <= s_borderres(x)(y+1);
---                end if;
---              else
---               s_border(x)(y) <= (others => '0');
---              end if;
-
---            elsif s_border_st = left then -- border only in first two quadrants
-              -- x|-
-              -- x|-
---              if v_y_norm > 0 then
---                s_border(x)(y) <= s_borderres(x)(y-1);
---              else
---                s_border(x)(y) <= (others => '0');
---              end if;
-                
---            elsif s_border_st = right then -- border only in quadrant 2 and 4
-              -- -|x
-              -- -|x
---              if v_y_norm < 0 then
---                s_border(x)(y) <= s_borderres(x)(y+1);
---              else
---                s_border(x)(y) <= (others => '0');
---              end if;
---            elsif s_border_st = down_left then -- border not in quadrant 3
-              -- x|-
-              -- x|x
---              if not (v_x_norm >= 0 and v_y_norm <= 0) then -- if not in second quadrant
---                if v_y_norm = -(v_x_norm) then -- y = -(x)
---                  s_border(x)(y) <= s_borderres(x+1)(y-1);
---                elsif (v_x_norm < 0 and v_y_norm < v_x_norm_abs) or (v_x_norm < 0 and v_y_norm < 0)  then --- y < abs(x)
---                  s_border(x)(y) <= s_borderres(x+1)(y);
---                else -- y => abs(x)
---                  s_border(x)(y) <= s_borderres(x)(y-1);
---                end if;
---              else
---                s_border(x)(y) <= (others => '0');
---              end if;
---            elsif s_border_st = down then -- border only in quadrant 3 and 4
-              -- -|-
-              -- x|x
---              if v_x_norm < 0 then
---                s_border(x)(y) <= s_borderres(x+1)(y);
---              else
---                s_border(x)(y) <= (others => '0'); 
---              end if;
---            elsif s_border_st = down_right then -- border in quadrant 2, 3 and 4
-              -- -|x
-              -- x|x
---              if v_x_norm < 0 or v_y_norm < 0  then 
---                if v_x_norm = v_y_norm then -- x = y
---                  s_border(x)(y) <= s_borderres(x+1)(y+1);
---                elsif v_x_norm < v_y_norm then  -- x < y
---                  s_border(x)(y) <= s_borderres(x+1)(y);
---                else  -- x > y
---                  s_border(x)(y) <= s_borderres(x)(y+1);
---                end if;
---              else
---                s_border(x)(y) <= (others => '0');
---              end if;
---            else -- in case no border
---              s_border(x)(y) <= (others => '0');
-
-
---            end if;   
           elsif(s_zero_pad='1') then
             s_border(x)(y) <= (others=>'0');
             if v_border_vec_int /= 0 then
@@ -319,37 +210,13 @@ v_border_vec_int := to_integer(unsigned(s_border_vec));
               s_arraybordermux(x)(y) <= '0'; -- else pass regular pixel
             end if;
           end if;
-      else -- pass regular pixel if border handling off;
+      else -- pass regular pixel if border handling off
         s_border(x)(y) <= (others=>'0');
         s_arraybordermux(x)(y) <='0';
       end if;
     end loop;    
   end loop;
 end process;
-
-
--- Mapping border array to border ring for correct Mux connextion
-
---con_border_ring: for i in c_num_bordering-1 downto 0 generate
---  con_border_x: for x in c_wh/2 downto -(c_wh-1)/2 generate
---    con_border_y: for y in (c_ww+par-1)/2 downto -(c_ww-1)/2 generate
---      -- connect middle pixel to lowest border ring
---      first_ring: if i=0 and x=0 and y >= 0 and y < par generate
---        -- Only connection no mux needed
---        s_border_res_ring(0)(x+c_wh-1/2)(y+(c_ww-1)/2) <= s_maskpar(x+c_wh-1/2)(y+c_ww/2);
-        
---      end generate;
-
- --     higher_rings: if i > 0 and not(y + 1 = i and abs(to_unsigned(x,c_integer) <= par-1) and
---                     (max(abs(to_unsigned(x,c_int_length),abs(to_unsigned(y,c_int_length)))) = i) or
---                     (y+par-1 = i and abs(to_unsigned(x,c_int_length) <= i) generate
-
-     --   s_border_ring(i)(x+c_wh-1/2)(y+c_ww+par-2/2) <= s_border(x+c_wh-1/2)(y+c_ww+par-2/2);
-
- --     end generate; 
- --   end generate;
---  end generate;
---end generate;
 
 
 -- PE mask mapping to swo 
@@ -447,35 +314,17 @@ con_par: for j in c_par_0-1 downto 0 generate
   end generate;
 end generate;
 
---save_mask: process(clk)
---begin
---  if clk'event and clk='1'then
---    if rst_n='0' then
---      s_maskreg <= (others=>(others=>(others=>(others=>'0')))); 
---    elsif nd='1' and en='1' then 
---      for j in 0 to c_par_0-1 loop
---        for x in 0 to c_wh_max_0-1 loop
---          for y in 0 to c_ww_max_0-1  loop
---            s_maskreg(j)(x)(y) <= s_secswopar(j)(x)(y);
---          end loop;
---        end loop;
---      end loop;
---    end if;
---  end if;
---end process;
-
 process(s_secswopar)
 begin
-      for j in 0 to c_par_0-1 loop
-        for x in 0 to c_wh_max_0-1 loop
-          for y in 0 to c_ww_max_0-1  loop
-            s_maskreg(j)(x)(y) <= s_secswopar(j)(x)(y);
-          end loop;
-        end loop;
+  for j in 0 to c_par_0-1 loop
+    for x in 0 to c_wh_max_0-1 loop
+      for y in 0 to c_ww_max_0-1  loop
+        s_maskreg(j)(x)(y) <= s_secswopar(j)(x)(y);
       end loop;
+    end loop;
+  end loop;
 end process;
 
 mo <= s_maskreg;
-
 
 end behavior;

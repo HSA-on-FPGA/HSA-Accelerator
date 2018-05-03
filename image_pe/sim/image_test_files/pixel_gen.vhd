@@ -21,8 +21,6 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.math_real.all;
---use work.pkg_functions.all;
---use work.pkg_config.all;
 
 entity pixel_gen is
 generic(
@@ -60,16 +58,6 @@ signal mem_r,mem_w: mem_type;
 signal mem_addr_r,mem_addr_w : std_logic_vector(c_memwidth-1 downto 0) := (others => '0');
 
 begin
-
-
---read_valid_proc: process(rclk)
---begin
---  if (rclk 'event and rclk = '1') then
---    read_valid <= nd;
---  end if;
---end process;
-
-
 
 read_mem_proc: process(rclk)
 begin

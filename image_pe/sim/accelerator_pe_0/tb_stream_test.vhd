@@ -46,7 +46,6 @@ constant c_base_coeff_two : integer:=c_num_im_para_0+c_vecsize;
 type VEC_KERINT is array(0 to c_vecsize-1) of integer;
 type VEC_COEFF is array(0 to c_vecsize-1) of std_logic_vector(c_regw_0-1 downto 0);
 type VEC_COLOR is array(0 to c_num_col_max_0-1) of std_logic_vector(c_par*c_pixw-1 downto 0);
---type ARRAY_COLOR is array(0 to c_par-1) of VEC_COLOR
 
 constant clk_period : time := 10 ns;
 constant c_iw : integer:= 20;
@@ -55,7 +54,6 @@ constant c_np : integer:= c_iw*c_ih;
 
 
 signal clk,cclk, en,nd, rst_n, valid,ready,start, init : std_logic;
---signal s_di,s_do : std_logic_vector(c_dw*c_par_0-1 downto 0):=(others=>'0');
 signal s_di : VEC_DPEPAR_0:=(others=>(others=>'0'));
 signal s_do : VEC_DPEPAR_0;
 signal s_dreg : std_logic_vector(c_regw_0-1 downto 0);
@@ -65,7 +63,7 @@ signal s_coeff_one: VEC_COEFF;
 signal s_coeff_two: VEC_COEFF;
 signal s_color: VEC_COLOR;
 signal s_red,s_green,s_blue : std_logic_vector(c_pixw-1 downto 0);
---signal s_di_gray: std_logic_vector(c_pixw_gray-1 downto 0);
+
 signal s_coeffint_one: VEC_KERINT:=(0,0,0,0,0,
                                     0,0,0,0,0,
                                     0,0,1,0,0,
@@ -88,12 +86,9 @@ alias a_norm_tresh : std_logic is s_operation(0); -- treshold off
 begin
 a_reserved <=(others=>'0');
 a_color <= '0';
-a_boarder <= "01";
+a_boarder <= "01"; -- only zero pad, other options are not supported for now!!
 a_kernelop <= "000";
 a_norm_tresh <= '0';
-
-
-
 
 -- correct coeeff mapping
 
@@ -114,7 +109,6 @@ port map (
   start => start,
   valid_out => valid,
 	ready_out => '1',
---  req => '1', -- FIXME see if loop works
   init => init,
   dreg => s_dreg,
   reg_addr => s_reg_addr, 
@@ -136,8 +130,6 @@ begin
   cclk <= '1';
   wait for clk_period/2;
 end process;
-
--- TODO set correct coeffs
 
 en_proc: process
 begin
@@ -227,7 +219,6 @@ end process;
 
 -- Mapping color signals to input
 par_gen: for i in 0 to c_par-1 generate
-  --s_di((i+1)*c_dw-((c_col-1)*c_pixw)-1 downto i*c_dw) <= std_logic_vector(resize(unsigned(s_color(0)((i+1)*c_pixw-1 downto i*c_pixw)),c_pixw_gray));
   s_di(i)(c_pixw_gray-1 downto 0) <= std_logic_vector(resize(unsigned(s_color(0)((i+1)*c_pixw-1 downto i*c_pixw)),c_pixw_gray));
   multicol_gen: if c_col>1 generate
     col_gen:for j in 0 to c_col-2 generate

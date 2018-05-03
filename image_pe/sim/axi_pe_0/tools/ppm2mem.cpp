@@ -1,9 +1,29 @@
+//
+// Copyright 2017 Konrad Haeublein
+//
+// konrad.haeublein@fau.de
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+
+
+
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
 #include <sstream>
 #include <string>
-//#include <iomanip>
 
 int main (int argc, char *argv[]) {
 	if (argc != 5) {
@@ -44,7 +64,6 @@ int main (int argc, char *argv[]) {
 	
 	outputFile.open(argv[4]);
 	int r,g,b;
-//	std::string rstring, gstring, bstring;
 
 	r = inputFile.get(); // for ignoring \n or white space
 	
@@ -52,9 +71,6 @@ int main (int argc, char *argv[]) {
 		r = inputFile.get();
 		g = inputFile.get();
 		b = inputFile.get();
-	//	itoa(r,rstring,16);
-	//	itoa(g,gstring,16);		//convert to hex
-	//	itoa(b,bstring,16);
    if(r<16)
    {   
      outputFile << std::hex << 0;
